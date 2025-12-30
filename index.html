@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>街头霸王6 - 队伍信息管理</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>⚔️ 街头霸王6 比赛管理</h1>
+                <div class="match-mode-selector">
+                    <button class="mode-btn active" data-mode="individual">个人赛</button>
+                    <button class="mode-btn" data-mode="team">团队赛</button>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-stats" id="statsBtn" title="数据统计">📊 统计</button>
+                <button class="add-member-btn-header" id="addMemberToPoolBtn">+ 添加成员</button>
+                <button class="add-team-btn" id="addTeamBtn">+ 创建队伍</button>
+            </div>
+        </header>
+
+        <!-- 比赛控制面板 -->
+        <div class="match-panel">
+            <div class="match-controls">
+                <button class="btn-match btn-quick-match" id="quickMatchBtn">⚡ 快速匹配</button>
+                <button class="btn-match btn-manual-match" id="manualMatchBtn">🎯 手动匹配</button>
+                <button class="btn-match btn-view-schedule" id="viewScheduleBtn">📅 查看赛程</button>
+            </div>
+            <div class="ranking-preview">
+                <h3>🏆 队伍排名</h3>
+                <div class="ranking-list" id="rankingPreview">
+                    <!-- 排名预览 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 公共成员池 -->
+        <div class="member-pool-section" id="memberPoolSection">
+            <div class="pool-header">
+                <h2>公共成员池 <span class="member-count" id="poolMemberCount">(0)</span></h2>
+                <p class="pool-hint">将成员拖拽到任意队伍中，或从队伍拖回公共池</p>
+            </div>
+            <div class="pool-members" id="poolMembers">
+                <!-- 公共池成员将通过JavaScript动态添加 -->
+            </div>
+        </div>
+
+        <!-- 个人赛参赛者区域 -->
+        <div class="individual-section" id="individualSection" style="display: none;">
+            <div class="individual-header">
+                <h2>个人赛参赛者 <span class="member-count" id="individualCount">(0)</span></h2>
+                <div class="individual-actions">
+                    <button class="btn-clear-individual" id="clearIndividualBtn">清空列表</button>
+                    <button class="btn-generate-bracket" id="generateBracketBtn">生成对战表</button>
+                </div>
+            </div>
+            <div class="individual-members" id="individualMembers">
+                <!-- 个人赛参赛者将通过JavaScript动态添加 -->
+            </div>
+        </div>
+
+        <!-- 队伍并排显示区域 -->
+        <div class="teams-container" id="teamsContainer">
+            <!-- 队伍卡片将通过JavaScript动态添加 -->
+        </div>
+    </div>
+
+    <!-- 对战匹配弹窗（团队赛） -->
+    <div class="modal" id="matchModal">
+        <div class="modal-content match-modal-content">
+            <span class="close" id="closeMatchModal">&times;</span>
+            <h2 id="matchModalTitle">对战匹配</h2>
+            
+            <!-- 队伍选择区域 -->
+            <div class="team-select-section">
+                <div class="team-select-group">
+                    <h3>选择队伍1</h3>
+                    <div class="team-select-list" id="team1SelectList"></div>
+                </div>
+                <div class="team-select-group">
+                    <h3>选择队伍2</h3>
+                    <div class="team-select-list" id="team2SelectList"></div>
+                </div>
+            </div>
+            
+            <div class="match-teams" id="matchTeams">
+                <div class="match-team" id="team1Display">
+                    <div class="team-placeholder">点击上方选择队伍1</div>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="match-team" id="team2Display">
+                    <div class="team-placeholder">点击上方选择队伍2</div>
+                </div>
+            </div>
+            <div class="match-prediction" id="matchPrediction"></div>
+            <div class="match-actions">
+                <button class="btn-cancel" id="cancelMatchBtn">取消</button>
+                <button class="btn-submit" id="startMatchBtn" disabled>开始比赛</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 个人赛锦标赛对战表弹窗 -->
+    <div class="modal" id="tournamentBracketModal">
+        <div class="modal-content bracket-modal-content">
+            <span class="close" id="closeBracketModal">&times;</span>
+            <h2 id="tournamentBracketTitle">个人赛锦标赛</h2>
+            <div class="tournament-tabs">
+                <button class="tab-btn active" data-stage="groups">第一天：小组赛</button>
+                <button class="tab-btn" data-stage="losers">第二天：败者组</button>
+                <button class="tab-btn" data-stage="second_round">第三天：第二轮</button>
+                <button class="tab-btn" data-stage="finals">第四天：16强决赛</button>
+            </div>
+            <div class="bracket-content" id="bracketContent">
+                <!-- 对战表内容 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 比赛进行中弹窗 -->
+    <div class="modal" id="matchInProgressModal">
+        <div class="modal-content match-progress-content">
+            <span class="close" id="closeProgressModal">&times;</span>
+            <h2>⚔️ 比赛进行中</h2>
+            <div class="match-progress-info" id="matchProgressInfo">
+                <!-- 比赛信息 -->
+            </div>
+            <div class="match-progress-actions">
+                <button class="btn-cancel" id="cancelProgressBtn">取消比赛</button>
+                <button class="btn-submit" id="enterScoreBtn">输入比分</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 比赛结果弹窗 -->
+    <div class="modal" id="matchResultModal">
+        <div class="modal-content result-modal-content">
+            <span class="close" id="closeResultModal">&times;</span>
+            <h2>比赛结果</h2>
+            <div class="result-display" id="resultDisplay"></div>
+            <div class="result-actions">
+                <button class="btn-submit" id="confirmResultBtn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 赛程表弹窗 -->
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content schedule-modal-content">
+            <span class="close" id="closeScheduleModal">&times;</span>
+            <h2>📅 比赛赛程</h2>
+            <div class="schedule-list" id="scheduleList">
+                <!-- 赛程列表 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑比赛弹窗 -->
+    <div class="modal" id="editMatchModal">
+        <div class="modal-content edit-match-content">
+            <span class="close" id="closeEditMatchModal">&times;</span>
+            <h2>编辑比赛</h2>
+            <div class="edit-match-form" id="editMatchForm">
+                <!-- 编辑表单 -->
+            </div>
+            <div class="form-actions">
+                <button class="btn-cancel" id="cancelEditMatchBtn">取消</button>
+                <button class="btn-submit" id="saveEditMatchBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据统计弹窗 -->
+    <div class="modal" id="statsModal">
+        <div class="modal-content stats-modal-content">
+            <span class="close" id="closeStatsModal">&times;</span>
+            <h2>📊 数据统计</h2>
+            <div class="stats-tabs">
+                <button class="tab-btn active" data-tab="teams">队伍排名</button>
+                <button class="tab-btn" data-tab="members">个人排名</button>
+                <button class="tab-btn" data-tab="matches">比赛记录</button>
+            </div>
+            <div class="stats-content">
+                <div class="tab-content active" id="teamsTab">
+                    <div class="ranking-full" id="teamsRanking"></div>
+                </div>
+                <div class="tab-content" id="membersTab">
+                    <div class="ranking-full" id="membersRanking"></div>
+                </div>
+                <div class="tab-content" id="matchesTab">
+                    <div class="matches-history" id="matchesHistory"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑成员弹窗 -->
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2 id="modalTitle">添加成员</h2>
+            <form id="memberForm">
+                <input type="hidden" id="memberTeamId">
+                <input type="hidden" id="memberSource" value="pool">
+                <div class="form-group">
+                    <label for="memberName">姓名：</label>
+                    <input type="text" id="memberName" required>
+                </div>
+                <div class="form-group">
+                    <label for="memberCharacter">使用角色：</label>
+                    <input type="text" id="memberCharacter" required>
+                </div>
+                <div class="form-group">
+                    <label for="memberRank">段位：</label>
+                    <select id="memberRank" required>
+                        <option value="">请选择</option>
+                        <option value="新手">新手</option>
+                        <option value="铁">铁</option>
+                        <option value="铜">铜</option>
+                        <option value="银">银</option>
+                        <option value="金">金</option>
+                        <option value="白金">白金</option>
+                        <option value="钻石">钻石</option>
+                        <option value="大师">大师</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="memberNote">备注：</label>
+                    <textarea id="memberNote" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelBtn">取消</button>
+                    <button type="submit" class="btn-submit">确认</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加/编辑队伍弹窗 -->
+    <div class="modal" id="teamModal">
+        <div class="modal-content">
+            <span class="close" id="closeTeamModal">&times;</span>
+            <h2 id="teamModalTitle">创建队伍</h2>
+            <form id="teamForm">
+                <div class="form-group">
+                    <label for="teamName">队伍名称：</label>
+                    <input type="text" id="teamName" required placeholder="请输入队伍名称">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelTeamBtn">取消</button>
+                    <button type="submit" class="btn-submit">确认</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 个人赛手动匹配弹窗 -->
+    <div class="modal" id="individualMatchModal">
+        <div class="modal-content individual-match-modal-content">
+            <span class="close" id="closeIndividualMatchModal">&times;</span>
+            <h2>手动选择个人赛参赛者</h2>
+            <div class="individual-select-section">
+                <div class="select-source-group">
+                    <h3>公共池成员</h3>
+                    <div class="member-select-list" id="poolSelectList"></div>
+                </div>
+                <div class="select-source-group">
+                    <h3>队伍成员</h3>
+                    <div class="member-select-list" id="teamSelectList"></div>
+                </div>
+            </div>
+            <div class="selected-individual-participants">
+                <h3>已选参赛者 (<span id="selectedIndividualCount">0</span>)</h3>
+                <div class="selected-individual-list" id="selectedIndividualList"></div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="cancelIndividualMatchBtn">取消</button>
+                <button type="button" class="btn-submit" id="confirmIndividualMatchBtn">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
