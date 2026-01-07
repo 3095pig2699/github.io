@@ -445,7 +445,7 @@ header h1 {
 /* 队伍容器 - 并排显示 */
 .teams-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 25px;
     align-items: start;
     padding-bottom: 50px; /* 增加底部内边距，方便拖拽到底部 */
@@ -934,9 +934,21 @@ header h1 {
 }
 
 /* 响应式设计 */
+@media (max-width: 1600px) {
+    .teams-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 @media (max-width: 1400px) {
     .teams-container {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1000px) {
+    .teams-container {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
